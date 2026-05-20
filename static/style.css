@@ -1,170 +1,265 @@
-
-/* =========================
-   NORMAL SCREEN STYLE
-========================= */
-
-body {
+* {
     margin: 0;
-    padding: 12px;
-    font-family: Arial, sans-serif;
-    background: #f1f5f9;
-    font-size: 13px;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Segoe UI", Arial, sans-serif;
 }
 
+body {
+    background: #f4f6f9;
+    color: #111827;
+}
+
+/* =========================
+   HEADER (COMMON)
+========================= */
 .header {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    padding: 15px 20px;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
+.header h1 {
+    font-size: 20px;
+}
+
+.logout {
+    background: #ef4444;
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    text-decoration: none;
+}
+
+.logout:hover {
+    background: #dc2626;
+}
+
+/* =========================
+   SIDEBAR STYLE (ADMIN)
+========================= */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 220px;
+    height: 100%;
+    background: #111827;
+    padding: 20px;
+    color: white;
+}
+
+.sidebar h2 {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.sidebar a {
+    display: block;
+    color: #cbd5e1;
+    padding: 10px;
+    text-decoration: none;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.sidebar a:hover {
+    background: #1f2937;
+    color: white;
+}
+
+/* =========================
+   MAIN CONTENT (ADMIN)
+========================= */
+.main {
+    margin-left: 240px;
+    padding: 20px;
+}
+
+/* =========================
+   CARDS (ADMIN DASHBOARD)
+========================= */
 .cards {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-top: 12px;
+    gap: 15px;
+    margin-top: 20px;
 }
 
-.card {
+.card-box {
     background: white;
-    padding: 12px;
-    border-radius: 10px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
     text-align: center;
 }
 
-.table-box {
-    background: white;
-    margin-top: 15px;
-    padding: 12px;
-    border-radius: 10px;
+.card-box h4 {
+    color: #6b7280;
+    font-size: 14px;
 }
 
+.card-box h2 {
+    margin-top: 10px;
+}
+
+/* =========================
+   TABLE BOX
+========================= */
+.table-box,
+.table-container {
+    background: white;
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+/* TABLE */
 table {
     width: 100%;
     border-collapse: collapse;
 }
 
-th, td {
-    padding: 6px;
-    border: 1px solid #ddd;
-    font-size: 13px;
+th {
+    background: #f3f4f6;
+    padding: 12px;
+    text-align: left;
 }
 
-/* BUTTONS */
+td {
+    padding: 12px;
+    border-bottom: 1px solid #eee;
+}
+
+tr:hover {
+    background: #f9fafb;
+}
+
+/* =========================
+   BUTTONS
+========================= */
 .action-btn {
     padding: 6px 10px;
     border-radius: 5px;
     text-decoration: none;
     color: white;
-    margin: 2px;
-    display: inline-block;
-    font-size: 12px;
-}
-
-.view { background: #2563eb; }
-.approve { background: #16a34a; }
-.reject { background: red; }
-.pdf { background: #ea580c; }
-.excel { background: #059669; }
-
-.logout {
-    background: red;
-    color: white;
-    padding: 8px 12px;
-    border-radius: 5px;
-    text-decoration: none;
-}
-
-/* INPUT */
-input,
-textarea {
-    width: 100%;
-    padding: 7px;
-    margin: 4px 0 10px 0;
-    box-sizing: border-box;
     font-size: 13px;
+    margin-right: 5px;
+}
+
+.view {
+    background: #2563eb;
+}
+
+.approve {
+    background: #16a34a;
+}
+
+.reject {
+    background: #dc2626;
+}
+
+.excel {
+    background: #f59e0b;
+}
+
+.pdf {
+    background: #7c3aed;
+}
+
+/* =========================
+   STATUS LABELS
+========================= */
+.status {
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+.Approved {
+    background: #dcfce7;
+    color: #16a34a;
+}
+
+.Rejected {
+    background: #fee2e2;
+    color: #dc2626;
+}
+
+.Pending {
+    background: #fef9c3;
+    color: #ca8a04;
+}
+
+/* =========================
+   FORMS (USER + LOGIN)
+========================= */
+form {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 400px;
+    margin: 40px auto;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+input,
+textarea,
+select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
 }
 
 button {
     background: #2563eb;
     color: white;
+    padding: 10px;
     border: none;
-    padding: 10px 14px;
+    width: 100%;
     border-radius: 6px;
     cursor: pointer;
 }
 
+button:hover {
+    background: #1d4ed8;
+}
+
 /* =========================
-   PRINT (MAX COMPRESSION)
+   LOGIN BOX
 ========================= */
+.login-box {
+    width: 350px;
+    margin: 80px auto;
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
 
-@media print {
-
-    @page {
-        size: A4;
-        margin: 3mm;
+/* =========================
+   RESPONSIVE
+========================= */
+@media (max-width: 768px) {
+    .cards {
+        grid-template-columns: 1fr;
     }
 
-    html, body {
-        margin: 0 !important;
-        padding: 0 !important;
-        background: white !important;
-        font-size: 8px !important;
-        overflow: hidden !important;
+    .sidebar {
+        position: relative;
+        width: 100%;
+        height: auto;
     }
 
-    body {
-        transform: scale(0.75);
-        transform-origin: top left;
-    }
-
-    /* HIDE EVERYTHING EXTRA */
-    .header,
-    .cards,
-    .logout,
-    .action-btn,
-    button,
-    .no-print {
-        display: none !important;
-    }
-
-    /* BOX COMPACT */
-    .table-box {
-        margin: 0 !important;
-        padding: 2px !important;
-        border: 1px solid #000 !important;
-        box-shadow: none !important;
-    }
-
-    /* TABLE COMPACT */
-    table {
-        width: 100% !important;
-        border-collapse: collapse !important;
-        font-size: 7px !important;
-    }
-
-    th, td {
-        border: 1px solid #000 !important;
-        padding: 1px !important;
-        line-height: 1 !important;
-    }
-
-    /* REMOVE SPACE */
-    h1, h2, h3 {
-        margin: 0 !important;
-        padding: 0 !important;
-        font-size: 9px !important;
-    }
-
-    input, textarea {
-        border: none !important;
-        padding: 0 !important;
-        margin: 0 !important;
-        font-size: 7px !important;
-    }
-
-    /* STOP PAGE BREAKS */
-    * {
-        page-break-inside: avoid !important;
+    .main {
+        margin-left: 0;
     }
 }
