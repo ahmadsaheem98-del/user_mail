@@ -89,20 +89,38 @@ def home():
 def register():
     if request.method == 'POST':
 
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+
+        # 🔥 CHECK EXISTING USER
+        existing_user = User.query.filter(
+            (User.email == email) | (User.username == username)
+        ).first()
+
+        if existing_user:
+            flash("User already exists")
+            return redirect('/register')
+
         user = User(
-            username=request.form.get('username'),
-            email=request.form.get('email'),
-            password=generate_password_hash(request.form.get('password')),
+            username=username,
+            email=email,
+            password=generate_password_hash(password),
             role='user'
         )
 
         db.session.add(user)
-        db.session.commit()
+
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            flash("Database error occurred")
+            print(e)
 
         return redirect('/login')
 
     return render_template('register.html')
-
 # ---------- LOGIN ----------
 @app.route('/login', methods=['GET', 'POST'])
 def login():
