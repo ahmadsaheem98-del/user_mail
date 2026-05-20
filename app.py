@@ -218,6 +218,10 @@ def excel(id):
 
     return send_file(file, as_attachment=True, download_name="form.xlsx")
 
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    return render_template('forgot_password.html')
+
 # =========================
 # RUN (RENDER READY)
 # =========================
