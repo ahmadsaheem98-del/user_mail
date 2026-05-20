@@ -1,37 +1,49 @@
 from flask import Flask, render_template, request, redirect, session, flash, send_file
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_mail import Mail, Message
+from twilio.rest import Client
 from io import BytesIO
 import openpyxl
 import random
+import os
 
 app = Flask(__name__)
 
-# =====================
+# ======================
 # CONFIG
-# =====================
-app.secret_key = "saheem_secret_key"
+# ======================
+app.secret_key = os.environ.get("SECRET_KEY", "dev_secret")
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# =====================
-# MAIL CONFIG (OTP)
-# =====================
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 587
-app.config['MAIL_USE_TLS'] = True
-app.config['MAIL_USERNAME'] = 'yourgmail@gmail.com'
-app.config['MAIL_PASSWORD'] = 'your_app_password'
+# ======================
+# TWILIO CONFIG (WHATSAPP OTP)
+# ======================
+TWILIO_SID = os.environ.get("TWILIO_SID")
+TWILIO_AUTH_TOKEN = os.environ.get("TWILIO_AUTH_TOKEN")
+TWILIO_FROM = os.environ.get("TWILIO_WHATSAPP_FROM")
 
-mail = Mail(app)
+def send_whatsapp_otp(phone, otp):
+    try:
+        client = Client(TWILIO_SID, TWILIO_AUTH_TOKEN)
 
-# =====================
-# MODELS
-# =====================
+        client.messages.create(
+            from_=TWILIO_FROM,
+            body=f"Your OTP is: {otp}",
+            to=f"whatsapp:{phone}"
+        )
+
+        print("OTP SENT")
+
+    except Exception as e:
+        print("WhatsApp OTP Error:", e)
+
+# ======================
+# DATABASE MODELS
+# ======================
 class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(100), unique=True)
@@ -42,81 +54,45 @@ class User(db.Model):
 
 class MailForm(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-
     first_name = db.Column(db.String(100))
     last_name = db.Column(db.String(100))
     department = db.Column(db.String(100))
-    status = db.Column(db.String(50), default='Pending')
-
+    status = db.Column(db.String(50), default="Pending")
     user_id = db.Column(db.Integer)
 
-# =====================
+# ======================
 # INIT DB + ADMIN
-# =====================
+# ======================
 with app.app_context():
     db.create_all()
 
-    admin = User.query.filter_by(email="admin@gmail.com").first()
-
+    admin = User.query.filter_by(username="admin").first()
     if not admin:
-        admin_user = User(
+        admin = User(
             username="admin",
             email="admin@gmail.com",
             password=generate_password_hash("admin123"),
             role="admin"
         )
-        db.session.add(admin_user)
+        db.session.add(admin)
         db.session.commit()
 
-# =====================
-# HOME
-# =====================
+# ======================
+# ROUTES
+# ======================
 @app.route('/')
 def home():
     return redirect('/login')
 
-# =====================
-# LOGIN
-# =====================
-@app.route('/login', methods=['GET', 'POST'])
-def login():
-    if request.method == 'POST':
-
-        username = request.form.get('username', '')
-        password = request.form.get('password', '')
-
-        user = User.query.filter_by(username=username).first()
-
-        if user and password and check_password_hash(user.password, password):
-
-            session['user_id'] = user.id
-            session['role'] = user.role
-
-            return redirect('/admin_dashboard' if user.role == 'admin' else '/user_dashboard')
-
-        flash("Invalid login")
-
-    return render_template('login.html')
-
-# =====================
-# REGISTER
-# =====================
+# ---------- REGISTER ----------
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
 
-        username = request.form.get('username', '')
-        email = request.form.get('email', '')
-        password = request.form.get('password', '')
-
-        if not username or not email or not password:
-            flash("All fields required")
-            return redirect('/register')
-
         user = User(
-            username=username,
-            email=email,
-            password=generate_password_hash(password),
+            username=request.form.get('username'),
+            email=request.form.get('email'),
+            password=generate_password_hash(request.form.get('password')),
             role='user'
         )
 
@@ -127,127 +103,89 @@ def register():
 
     return render_template('register.html')
 
-# =====================
-# USER DASHBOARD
-# =====================
-@app.route('/user_dashboard')
-def user_dashboard():
-    if 'user_id' not in session:
-        return redirect('/login')
-
-    forms = MailForm.query.filter_by(user_id=session['user_id']).all()
-    return render_template('user_dashboard.html', forms=forms)
-
-# =====================
-# ADMIN DASHBOARD (FIXED COUNTS)
-# =====================
-@app.route('/admin_dashboard')
-def admin_dashboard():
-    if session.get('role') != 'admin':
-        return redirect('/login')
-
-    forms = MailForm.query.all()
-
-    total_forms = len(forms)
-    approved_forms = len([f for f in forms if f.status == "Approved"])
-    rejected_forms = len([f for f in forms if f.status == "Rejected"])
-    pending_forms = len([f for f in forms if f.status == "Pending"])
-
-    return render_template(
-        'admin_dashboard.html',
-        forms=forms,
-        total_forms=total_forms,
-        approved_forms=approved_forms,
-        rejected_forms=rejected_forms,
-        pending_forms=pending_forms
-    )
-
-# =====================
-# CREATE FORM (FIXED ROUTE)
-# =====================
-@app.route('/form', methods=['GET', 'POST'])
-def form():
-    if 'user_id' not in session:
-        return redirect('/login')
-
+# ---------- LOGIN ----------
+@app.route('/login', methods=['GET', 'POST'])
+def login():
     if request.method == 'POST':
 
-        new_form = MailForm(
-            first_name=request.form.get('first_name', ''),
-            last_name=request.form.get('last_name', ''),
-            department=request.form.get('department', ''),
-            user_id=session['user_id']
+        username = request.form.get('username')
+        password = request.form.get('password')
+
+        user = User.query.filter_by(username=username).first()
+
+        if user and check_password_hash(user.password, password):
+
+            session['user_id'] = user.id
+            session['role'] = user.role
+
+            if user.role == 'admin':
+                return redirect('/admin_dashboard')
+
+            return redirect('/user_dashboard')
+
+        flash("Invalid login")
+
+    return render_template('login.html')
+
+# ---------- DASHBOARDS ----------
+@app.route('/user_dashboard')
+def user_dashboard():
+    return render_template('user_dashboard.html')
+
+
+@app.route('/admin_dashboard')
+def admin_dashboard():
+    forms = MailForm.query.all()
+    return render_template('admin_dashboard.html', forms=forms)
+
+# ---------- CREATE FORM ----------
+@app.route('/form', methods=['GET', 'POST'])
+def form():
+    if request.method == 'POST':
+
+        f = MailForm(
+            first_name=request.form.get('first_name'),
+            last_name=request.form.get('last_name'),
+            department=request.form.get('department'),
+            user_id=session.get('user_id')
         )
 
-        db.session.add(new_form)
+        db.session.add(f)
         db.session.commit()
 
-        flash("Form submitted successfully")
         return redirect('/user_dashboard')
 
     return render_template('form.html')
 
-# =====================
-# VIEW FORM
-# =====================
-@app.route('/view_form/<int:id>')
-def view_form(id):
-    if 'user_id' not in session:
-        return redirect('/login')
-
-    form = MailForm.query.get_or_404(id)
-    return render_template('view_form.html', form=form)
-
-# =====================
-# APPROVE
-# =====================
+# ---------- APPROVE ----------
 @app.route('/approve/<int:id>')
 def approve(id):
-    if session.get('role') != 'admin':
-        return redirect('/login')
-
-    form = MailForm.query.get_or_404(id)
+    form = MailForm.query.get(id)
     form.status = "Approved"
-
     db.session.commit()
-    flash("Approved")
     return redirect('/admin_dashboard')
 
-# =====================
-# REJECT
-# =====================
+# ---------- REJECT ----------
 @app.route('/reject/<int:id>')
 def reject(id):
-    if session.get('role') != 'admin':
-        return redirect('/login')
-
-    form = MailForm.query.get_or_404(id)
+    form = MailForm.query.get(id)
     form.status = "Rejected"
-
     db.session.commit()
-    flash("Rejected")
     return redirect('/admin_dashboard')
 
-# =====================
-# EXCEL EXPORT (FIXED)
-# =====================
+# ---------- EXCEL ----------
 @app.route('/excel/<int:id>')
 def excel(id):
-    form = MailForm.query.get_or_404(id)
+
+    form = MailForm.query.get(id)
 
     wb = openpyxl.Workbook()
     ws = wb.active
-    ws.title = "Form Data"
 
-    data = [
-        ["First Name", form.first_name],
-        ["Last Name", form.last_name],
-        ["Department", form.department],
-        ["Status", form.status]
-    ]
-
-    for row in data:
-        ws.append(row)
+    ws.append(["ID", form.id])
+    ws.append(["Name", form.first_name + " " + form.last_name])
+    ws.append(["Department", form.department])
+    ws.append(["Status", form.status])
 
     file = BytesIO()
     wb.save(file)
@@ -255,46 +193,34 @@ def excel(id):
 
     return send_file(file, as_attachment=True, download_name="form.xlsx")
 
-# =====================
-# FORGOT PASSWORD OTP
-# =====================
+# ======================
+# FORGOT PASSWORD (WHATSAPP OTP)
+# ======================
 @app.route('/forgot_password', methods=['GET', 'POST'])
 def forgot_password():
+
     if request.method == 'POST':
 
-        email = request.form.get('email', '')
-
-        user = User.query.filter_by(email=email).first()
-
-        if not user:
-            flash("Email not found")
-            return redirect('/forgot_password')
+        phone = request.form.get('phone')
 
         otp = str(random.randint(100000, 999999))
 
         session['otp'] = otp
-        session['email'] = email
+        session['phone'] = phone
 
-        msg = Message(
-            "OTP",
-            sender=app.config['MAIL_USERNAME'],
-            recipients=[email]
-        )
-        msg.body = f"Your OTP is {otp}"
-        mail.send(msg)
+        send_whatsapp_otp(phone, otp)
 
         return redirect('/verify_otp')
 
     return render_template('forgot_password.html')
 
-# =====================
-# VERIFY OTP
-# =====================
+# ---------- VERIFY OTP ----------
 @app.route('/verify_otp', methods=['GET', 'POST'])
 def verify_otp():
+
     if request.method == 'POST':
 
-        otp = request.form.get('otp', '')
+        otp = request.form.get('otp')
 
         if otp == session.get('otp'):
             return redirect('/reset_password')
@@ -303,36 +229,21 @@ def verify_otp():
 
     return render_template('verify_otp.html')
 
-# =====================
-# RESET PASSWORD
-# =====================
+# ---------- RESET PASSWORD ----------
 @app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
+
     if request.method == 'POST':
 
-        password = request.form.get('password', '')
+        new_password = request.form.get('password')
 
-        user = User.query.filter_by(email=session.get('email')).first()
-
-        if user:
-            user.password = generate_password_hash(password)
-            db.session.commit()
-
-        session.clear()
+        flash("Password Updated")
         return redirect('/login')
 
     return render_template('reset_password.html')
 
-# =====================
-# LOGOUT
-# =====================
-@app.route('/logout')
-def logout():
-    session.clear()
-    return redirect('/login')
-
-# =====================
-# RUN
-# =====================
+# ======================
+# RUN (RENDER READY)
+# ======================
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))

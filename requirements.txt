@@ -1,7 +1,7 @@
-flask
-flask_sqlalchemy
-werkzeug
-flask-mail
+Flask
+Flask-SQLAlchemy
+Flask-Mail
+Werkzeug
 openpyxl
+twilio
 gunicorn
-waitress
