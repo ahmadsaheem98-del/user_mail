@@ -1,66 +1,69 @@
-from flask import Flask, render_template
-from flask import request, redirect
-from flask import session
-from flask import make_response
-
+from flask import Flask, render_template, request, redirect, session, flash, send_file
 from flask_sqlalchemy import SQLAlchemy
-
-from werkzeug.security import generate_password_hash
-from werkzeug.security import check_password_hash
-
-from waitress import serve
-
-# =====================================================
-# APP
-# =====================================================
+from werkzeug.security import generate_password_hash, check_password_hash
+from flask_mail import Mail, Message
+from io import BytesIO
+from datetime import datetime
+import openpyxl
+import random
 
 app = Flask(__name__)
 
-app.secret_key = "secret_key"
+# =========================
+# SECRET KEY
+# =========================
+app.secret_key = "saheem_secret_key"
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mail_system.db'
-
+# =========================
+# DATABASE
+# =========================
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///database.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
 
-# =====================================================
+# =========================
+# EMAIL CONFIG
+# =========================
+# =========================
+# EMAIL CONFIG
+# =========================
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+
+# YOUR GMAIL
+app.config['MAIL_USERNAME'] = 'ahmadsaheem98@gmail.com'
+
+# GOOGLE APP PASSWORD
+app.config['MAIL_PASSWORD'] = 'ocxqecmxunhkgafm'
+
+mail = Mail(app)
+
+# =========================
 # USER TABLE
-# =====================================================
-
+# =========================
 class User(db.Model):
-
     id = db.Column(db.Integer, primary_key=True)
 
-    username = db.Column(
-        db.String(100),
-        unique=True
-    )
+    username = db.Column(db.String(100), unique=True)
+    email = db.Column(db.String(120), unique=True)
 
-    email = db.Column(
-        db.String(200),
-        unique=True
-    )
+    password = db.Column(db.String(200))
 
-    password = db.Column(
-        db.String(300)
-    )
+    role = db.Column(db.String(20), default='user')
 
-    role = db.Column(
-        db.String(20)
-    )
-
-# =====================================================
+# =========================
 # FORM TABLE
-# =====================================================
-
+# =========================
 class MailForm(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
 
     company_name = db.Column(db.String(200))
     location = db.Column(db.String(200))
-    form_date = db.Column(db.String(100))
+    form_date = db.Column(db.String(50))
 
     first_name = db.Column(db.String(100))
     middle_name = db.Column(db.String(100))
@@ -80,173 +83,198 @@ class MailForm(db.Model):
     mail_service = db.Column(db.String(100))
     created_by = db.Column(db.String(100))
 
-    domain = db.Column(db.String(100))
+    domain_name = db.Column(db.String(100))
     preferred_id = db.Column(db.String(200))
 
     it_name = db.Column(db.String(100))
     it_designation = db.Column(db.String(100))
+
     it_contact = db.Column(db.String(100))
     it_email = db.Column(db.String(100))
 
     remarks = db.Column(db.Text)
 
-    status = db.Column(
-        db.String(50),
-        default="Pending"
-    )
+    status = db.Column(db.String(50), default='Pending')
 
-    created_by_user = db.Column(
-        db.String(100)
-    )
+    user_id = db.Column(db.Integer)
 
-# =====================================================
-# DATABASE CREATE
-# =====================================================
-
+# =========================
+# CREATE DATABASE
+# =========================
 with app.app_context():
-
     db.create_all()
 
-    admin = User.query.filter_by(
-        username="Saheem@123"
-    ).first()
+    admin = User.query.filter_by(username="Saheem@123").first()
 
     if not admin:
-
         admin_user = User(
-
             username="Saheem@123",
-
-            email="admin@system.com",
-
-            password=generate_password_hash(
-                "Saheem123"
-            ),
-
+            email="admin@gmail.com",
+            password=generate_password_hash("Saheem123"),
             role="admin"
         )
 
         db.session.add(admin_user)
-
         db.session.commit()
 
-# =====================================================
-# LOGIN
-# =====================================================
+# =========================
+# SEND EMAIL
+# =========================
+def send_email(to, subject, body):
 
-@app.route('/', methods=['GET', 'POST'])
-def login():
+    try:
 
-    if request.method == 'POST':
+        msg = Message(
+            subject,
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[to]
+        )
 
-        username = request.form['username']
+        msg.body = body
 
-        password = request.form['password']
+        mail.send(msg)
 
-        user = User.query.filter_by(
-            username=username
-        ).first()
+    except:
+        print("Email not sent")
 
-        if user and check_password_hash(
-            user.password,
-            password
-        ):
+# =========================
+# HOME
+# =========================
+@app.route('/')
+def home():
+    return redirect('/login')
 
-            session['user'] = username
-
-            session['role'] = user.role
-
-            if user.role == 'admin':
-
-                return redirect('/admin')
-
-            return redirect('/dashboard')
-
-    return render_template('login.html')
-
-# =====================================================
+# =========================
 # REGISTER
-# =====================================================
-
+# =========================
 @app.route('/register', methods=['GET', 'POST'])
 def register():
 
     if request.method == 'POST':
 
         username = request.form['username']
-
         email = request.form['email']
+        password = request.form['password']
 
-        password = generate_password_hash(
-            request.form['password']
-        )
-
-        check_user = User.query.filter(
+        existing = User.query.filter(
             (User.username == username) |
             (User.email == email)
         ).first()
 
-        if check_user:
-
-            return "User already exists"
+        if existing:
+            flash("User already exists")
+            return redirect('/register')
 
         new_user = User(
-
             username=username,
-
             email=email,
-
-            password=password,
-
+            password=generate_password_hash(password),
             role='user'
         )
 
         db.session.add(new_user)
-
         db.session.commit()
 
-        return redirect('/')
+        send_email(
+            email,
+            "Registration Success",
+            "Your account has been created successfully."
+        )
+
+        flash("Registration Successful")
+
+        return redirect('/login')
 
     return render_template('register.html')
 
-# =====================================================
-# USER DASHBOARD
-# =====================================================
-
-@app.route('/dashboard')
-def dashboard():
-
-    if 'user' not in session:
-
-        return redirect('/')
-
-    forms = MailForm.query.filter_by(
-
-        created_by_user=session['user']
-
-    ).all()
-
-    return render_template(
-
-        'user_dashboard.html',
-
-        forms=forms
-    )
-
-# =====================================================
-# CREATE FORM
-# =====================================================
-
-@app.route('/create', methods=['GET', 'POST'])
-def create():
-
-    if 'user' not in session:
-
-        return redirect('/')
+# =========================
+# LOGIN
+# =========================
+@app.route('/login', methods=['GET', 'POST'])
+def login():
 
     if request.method == 'POST':
 
-        form = MailForm(
+        username = request.form['username']
+        password = request.form['password']
+
+        user = User.query.filter_by(username=username).first()
+
+        if user and check_password_hash(user.password, password):
+
+            session['user_id'] = user.id
+            session['role'] = user.role
+            session['username'] = user.username
+
+            if user.role == 'admin':
+                return redirect('/admin_dashboard')
+
+            return redirect('/user_dashboard')
+
+        else:
+            flash("Invalid Login")
+
+    return render_template('login.html')
+
+# =========================
+# LOGOUT
+# =========================
+@app.route('/logout')
+def logout():
+
+    session.clear()
+
+    return redirect('/login')
+
+# =========================
+# USER DASHBOARD
+# =========================
+@app.route('/user_dashboard')
+def user_dashboard():
+
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    forms = MailForm.query.filter_by(
+        user_id=session['user_id']
+    ).all()
+
+    return render_template(
+        'user_dashboard.html',
+        forms=forms
+    )
+
+# =========================
+# ADMIN DASHBOARD
+# =========================
+@app.route('/admin_dashboard')
+def admin_dashboard():
+
+    if 'role' not in session:
+        return redirect('/login')
+
+    if session['role'] != 'admin':
+        return redirect('/login')
+
+    forms = MailForm.query.all()
+
+    return render_template(
+        'admin_dashboard.html',
+        forms=forms
+    )
+
+# =========================
+# CREATE FORM
+# =========================
+@app.route('/form', methods=['GET', 'POST'])
+def form():
+
+    if 'user_id' not in session:
+        return redirect('/login')
+
+    if request.method == 'POST':
+
+        new_form = MailForm(
 
             company_name=request.form['company_name'],
             location=request.form['location'],
@@ -270,79 +298,37 @@ def create():
             mail_service=request.form['mail_service'],
             created_by=request.form['created_by'],
 
-            domain=request.form['domain'],
+            domain_name=request.form['domain_name'],
             preferred_id=request.form['preferred_id'],
 
             it_name=request.form['it_name'],
             it_designation=request.form['it_designation'],
+
             it_contact=request.form['it_contact'],
             it_email=request.form['it_email'],
 
             remarks=request.form['remarks'],
 
-            created_by_user=session['user']
+            user_id=session['user_id']
         )
 
-        db.session.add(form)
-
+        db.session.add(new_form)
         db.session.commit()
 
-        return redirect('/dashboard')
+        flash("Form Submitted Successfully")
+
+        return redirect('/user_dashboard')
 
     return render_template('form.html')
 
-# =====================================================
-# ADMIN DASHBOARD
-# =====================================================
-
-@app.route('/admin')
-def admin():
-
-    if session.get('role') != 'admin':
-
-        return redirect('/')
-
-    forms = MailForm.query.all()
-
-    total_forms = MailForm.query.count()
-
-    approved_forms = MailForm.query.filter_by(
-        status="Approved"
-    ).count()
-
-    pending_forms = MailForm.query.filter_by(
-        status="Pending"
-    ).count()
-
-    rejected_forms = MailForm.query.filter_by(
-        status="Rejected"
-    ).count()
-
-    return render_template(
-
-        'admin_dashboard.html',
-
-        forms=forms,
-
-        total_forms=total_forms,
-
-        approved_forms=approved_forms,
-
-        pending_forms=pending_forms,
-
-        rejected_forms=rejected_forms
-    )
-
-# =====================================================
+# =========================
 # VIEW FORM
-# =====================================================
+# =========================
+@app.route('/view_form/<int:id>')
+def view_form(id):
 
-@app.route('/view/<int:id>')
-def view(id):
-
-    if session.get('role') != 'admin':
-
-        return redirect('/')
+    if 'user_id' not in session:
+        return redirect('/login')
 
     form = MailForm.query.get_or_404(id)
 
@@ -351,16 +337,14 @@ def view(id):
         form=form
     )
 
-# =====================================================
-# APPROVE
-# =====================================================
-
+# =========================
+# APPROVE FORM
+# =========================
 @app.route('/approve/<int:id>')
 def approve(id):
 
     if session.get('role') != 'admin':
-
-        return redirect('/')
+        return redirect('/login')
 
     form = MailForm.query.get_or_404(id)
 
@@ -368,18 +352,18 @@ def approve(id):
 
     db.session.commit()
 
-    return redirect('/admin')
+    flash("Form Approved")
 
-# =====================================================
-# REJECT
-# =====================================================
+    return redirect('/admin_dashboard')
 
+# =========================
+# REJECT FORM
+# =========================
 @app.route('/reject/<int:id>')
 def reject(id):
 
     if session.get('role') != 'admin':
-
-        return redirect('/')
+        return redirect('/login')
 
     form = MailForm.query.get_or_404(id)
 
@@ -387,85 +371,70 @@ def reject(id):
 
     db.session.commit()
 
-    return redirect('/admin')
+    flash("Form Rejected")
 
-# =====================================================
-# DOWNLOAD HTML
-# =====================================================
+    return redirect('/admin_dashboard')
 
-@app.route('/download/<int:id>')
-def download(id):
-
-    if session.get('role') != 'admin':
-
-        return redirect('/')
+# =========================
+# EXCEL EXPORT
+# =========================
+@app.route('/excel/<int:id>')
+def excel(id):
 
     form = MailForm.query.get_or_404(id)
 
-    html = render_template(
-        'view_form.html',
-        form=form
+    wb = openpyxl.Workbook()
+
+    ws = wb.active
+
+    ws.title = "Mail Form"
+
+    data = [
+
+        ["Company Name", form.company_name],
+        ["Location", form.location],
+        ["Form Date", form.form_date],
+
+        ["First Name", form.first_name],
+        ["Middle Name", form.middle_name],
+        ["Last Name", form.last_name],
+
+        ["Employee Code", form.employee_code],
+        ["Contact Detail", form.contact_detail],
+
+        ["Mobile", form.mobile],
+        ["Department", form.department],
+
+        ["Designation", form.designation],
+
+        ["Preferred ID", form.preferred_id],
+
+        ["Status", form.status]
+
+    ]
+
+    for row in data:
+        ws.append(row)
+
+    file = BytesIO()
+
+    wb.save(file)
+
+    file.seek(0)
+
+    return send_file(
+        file,
+        download_name='mail_form.xlsx',
+        as_attachment=True
     )
 
-    response = make_response(html)
+# =========================
+# RUN APP
+# =========================
+if __name__ == "__main__":
 
-    response.headers['Content-Type'] = 'text/html'
-
-    response.headers['Content-Disposition'] = (
-        f'attachment; filename=form_{id}.html'
-    )
-
-    return response
-
-# =====================================================
-# EXPORT EXCEL
-# =====================================================
-
-@app.route('/export_excel/<int:id>')
-def export_excel(id):
-
-    if session.get('role') != 'admin':
-
-        return redirect('/')
-
-    form = MailForm.query.get_or_404(id)
-
-    html = render_template(
-        'view_form.html',
-        form=form
-    )
-
-    response = make_response(html)
-
-    response.headers['Content-Type'] = (
-        'application/vnd.ms-excel'
-    )
-
-    response.headers['Content-Disposition'] = (
-        f'attachment; filename=form_{id}.xls'
-    )
-
-    return response
-
-# =====================================================
-# LOGOUT
-# =====================================================
-
-@app.route('/logout')
-def logout():
-
-    session.clear()
-
-    return redirect('/')
-
-# =====================================================
-# RUN SERVER
-# =====================================================
-
-if __name__ == '__main__':
-
-    serve(
-        app,
-        host='0.0.0.0',
-        port=5000
+    app.run(
+        host="0.0.0.0",
+        port=5000,
+        debug=True
     )
