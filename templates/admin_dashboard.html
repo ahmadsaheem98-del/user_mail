@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>Admin Dashboard</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="header">
+
+<h1>Admin Dashboard</h1>
+
+<a href="/logout" class="logout">
+
+Logout
+
+</a>
+
+</div>
+
+<div class="cards">
+
+<div class="card">
+
+<h2>Total</h2>
+
+<h1>{{ total_forms }}</h1>
+
+</div>
+
+<div class="card">
+
+<h2>Approved</h2>
+
+<h1>{{ approved_forms }}</h1>
+
+</div>
+
+<div class="card">
+
+<h2>Pending</h2>
+
+<h1>{{ pending_forms }}</h1>
+
+</div>
+
+<div class="card">
+
+<h2>Rejected</h2>
+
+<h1>{{ rejected_forms }}</h1>
+
+</div>
+
+</div>
+
+<div class="table-box">
+
+<h2>All Forms</h2>
+
+<br>
+
+<table border="1" width="100%" cellpadding="10">
+
+<tr>
+
+<th>ID</th>
+
+<th>Name</th>
+
+<th>Department</th>
+
+<th>Status</th>
+
+<th>Actions</th>
+
+</tr>
+
+{% for form in forms %}
+
+<tr>
+
+<td>{{ form.id }}</td>
+
+<td>
+
+{{ form.first_name }}
+{{ form.last_name }}
+
+</td>
+
+<td>{{ form.department }}</td>
+
+<td>
+
+{% if form.status == 'Approved' %}
+
+<span style="color:green;font-weight:bold;">
+
+Approved
+
+</span>
+
+{% elif form.status == 'Rejected' %}
+
+<span style="color:red;font-weight:bold;">
+
+Rejected
+
+</span>
+
+{% else %}
+
+<span style="color:orange;font-weight:bold;">
+
+Pending
+
+</span>
+
+{% endif %}
+
+</td>
+
+<td>
+
+<a href="/view/{{ form.id }}"
+class="action-btn view">
+
+View
+
+</a>
+
+<a href="/approve/{{ form.id }}"
+class="action-btn approve">
+
+Approve
+
+</a>
+
+<a href="/reject/{{ form.id }}"
+class="action-btn reject">
+
+Reject
+
+</a>
+
+<a href="/download/{{ form.id }}"
+class="action-btn pdf">
+
+HTML
+
+</a>
+
+<a href="/export_excel/{{ form.id }}"
+class="action-btn excel">
+
+Excel
+
+</a>
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+</body>
+</html>

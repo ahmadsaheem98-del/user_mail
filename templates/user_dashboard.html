@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+<title>User Dashboard</title>
+
+<link rel="stylesheet"
+href="{{ url_for('static', filename='style.css') }}">
+
+</head>
+
+<body>
+
+<div class="header">
+
+<h1>User Dashboard</h1>
+
+<a href="/logout" class="logout">
+
+Logout
+
+</a>
+
+</div>
+
+<br>
+
+<a href="/create" class="action-btn approve">
+
+Create Mail Form
+
+</a>
+
+<div class="table-box">
+
+<h2>Your Submitted Forms</h2>
+
+<br>
+
+<table border="1" width="100%" cellpadding="10">
+
+<tr>
+
+<th>ID</th>
+
+<th>Name</th>
+
+<th>Department</th>
+
+<th>Status</th>
+
+</tr>
+
+{% for form in forms %}
+
+<tr>
+
+<td>{{ form.id }}</td>
+
+<td>
+
+{{ form.first_name }}
+{{ form.last_name }}
+
+</td>
+
+<td>
+
+{{ form.department }}
+
+</td>
+
+<td>
+
+{% if form.status == 'Approved' %}
+
+<span style="color:green;font-weight:bold;">
+
+Approved
+
+</span>
+
+{% elif form.status == 'Rejected' %}
+
+<span style="color:red;font-weight:bold;">
+
+Rejected
+
+</span>
+
+{% else %}
+
+<span style="color:orange;font-weight:bold;">
+
+Pending
+
+</span>
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+</div>
+
+</body>
+</html>

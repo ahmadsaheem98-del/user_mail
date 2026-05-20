@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAIL ID CREATION REQUISITION FORM</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:Arial, sans-serif;
+}
+
+body{
+    background:#f2f2f2;
+    padding:20px;
+}
+
+.sheet{
+    width:1100px;
+    margin:auto;
+    background:white;
+    border:2px solid #000;
+    padding:15px;
+}
+
+.top-header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:10px;
+}
+
+.logo img{
+    max-height:80px;
+    object-fit:contain;
+}
+
+.title{
+    text-align:center;
+    font-size:24px;
+    font-weight:bold;
+    text-decoration:underline;
+    margin-bottom:15px;
+}
+
+.heading{
+    background:#7f7358;
+    color:white;
+    font-weight:bold;
+    padding:6px 10px;
+    border:1px solid #000;
+    margin-top:10px;
+}
+
+.section{
+    border:1px solid #000;
+    padding:10px;
+}
+
+.row{
+    display:flex;
+    margin-bottom:12px;
+    gap:20px;
+}
+
+.field{
+    flex:1;
+}
+
+label{
+    display:block;
+    font-size:14px;
+    font-weight:bold;
+    margin-bottom:4px;
+}
+
+input{
+    width:100%;
+    border:none;
+    border-bottom:1px solid #000;
+    padding:5px;
+    font-size:14px;
+    outline:none;
+}
+
+.long-box{
+    height:120px;
+    border:1px solid #000;
+}
+
+.note{
+    font-size:13px;
+    margin-top:8px;
+}
+
+.footer-row{
+    display:flex;
+    justify-content:space-between;
+    margin-top:50px;
+}
+
+.sign{
+    width:300px;
+    border-top:1px solid #000;
+    text-align:center;
+    padding-top:5px;
+}
+
+textarea{
+    width:100%;
+    height:100px;
+    border:none;
+    outline:none;
+    resize:none;
+}
+
+.btn{
+    padding:10px 20px;
+    background:#000;
+    color:white;
+    border:none;
+    cursor:pointer;
+    margin-top:20px;
+}
+
+@media print{
+    body{
+        background:white;
+        padding:0;
+    }
+
+    .sheet{
+        border:none;
+    }
+
+    .btn{
+        display:none;
+    }
+}
+
+</style>
+</head>
+
+<body>
+
+<form method="POST">
+
+<div class="sheet">
+
+    <div class="top-header">
+
+        <div class="logo">
+            <img src="{{ url_for('static', filename='download.png') }}">
+        </div>
+
+    </div>
+
+    <div class="title">
+        MAIL ID CREATION REQUISITION FORM
+    </div>
+
+    <div class="field" style="text-align:right;">
+        <label>Effective Date (dd-mm-yyyy)</label>
+        <input type="text" value="20-02-2026">
+    </div>
+
+    <div class="heading">
+        ID Requisition Type Creation
+    </div>
+
+    <div class="section">
+
+        <div style="font-weight:bold; margin-bottom:10px;">
+            Company Information:
+        </div>
+
+        <div class="row">
+
+            <div class="field">
+                <label>Company Name</label>
+                <input type="text" name="company_name" required>
+            </div>
+
+            <div class="field">
+                <label>Location</label>
+                <input type="text" name="location" required>
+            </div>
+
+            <div class="field">
+                <label>Date(dd/mm/yyyy)</label>
+                <input type="text" name="form_date" required>
+            </div>
+
+        </div>
+
+        <div class="long-box"></div>
+
+    </div>
+
+    <div class="heading">
+        Personal Details
+    </div>
+
+    <div class="section">
+
+        <div class="row">
+
+            <div class="field">
+                <label>First Name</label>
+                <input type="text" name="first_name" required>
+            </div>
+
+            <div class="field">
+                <label>Middle Name</label>
+                <input type="text" name="middle_name">
+            </div>
+
+            <div class="field">
+                <label>Last Name</label>
+                <input type="text" name="last_name" required>
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="field">
+                <label>Employee Code</label>
+                <input type="text" name="employee_code">
+            </div>
+
+            <div class="field">
+                <label>Contact Detail</label>
+                <input type="text" name="contact_detail">
+            </div>
+
+            <div class="field">
+                <label>Extn No</label>
+                <input type="text" name="extn_no">
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="field">
+                <label>Mobile</label>
+                <input type="text" name="mobile">
+            </div>
+
+            <div class="field">
+                <label>Date Of Joining</label>
+                <input type="text" name="joining_date">
+            </div>
+
+            <div class="field">
+                <label>Department</label>
+                <input type="text" name="department">
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="field">
+                <label>Designation</label>
+                <input type="text" name="designation">
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="heading">
+        Mail ID Creation Request
+    </div>
+
+    <div class="section">
+
+        <div class="row">
+
+            <div class="field">
+                <label>Email Type</label>
+                <input type="text" name="email_type">
+            </div>
+
+            <div class="field">
+                <label>Mail Service Facility</label>
+                <input type="text" name="mail_service">
+            </div>
+
+            <div class="field">
+                <label>Mail ID Created By</label>
+                <input type="text" name="created_by">
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="field">
+                <label>Insert DOMAIN</label>
+                <input type="text" name="domain">
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="field">
+                <label>Preferred ID</label>
+                <input type="text" name="preferred_id">
+            </div>
+
+        </div>
+
+        <div class="note">
+            I hereby undertake that this ID is solely for the purpose of business use and will not be shared with anyone.
+        </div>
+
+    </div>
+
+    <div class="heading">
+        IT Head
+    </div>
+
+    <div class="section">
+
+        <div class="row">
+
+            <div class="field">
+                <label>Name</label>
+                <input type="text" name="it_name">
+            </div>
+
+            <div class="field">
+                <label>Designation</label>
+                <input type="text" name="it_designation">
+            </div>
+
+        </div>
+
+        <div class="row">
+
+            <div class="field">
+                <label>Contact Detail</label>
+                <input type="text" name="it_contact">
+            </div>
+
+            <div class="field">
+                <label>Email Address</label>
+                <input type="text" name="it_email">
+            </div>
+
+        </div>
+
+    </div>
+
+    <div class="heading">
+        Tech Support Remarks
+    </div>
+
+    <div class="section">
+        <textarea name="remarks"></textarea>
+    </div>
+
+    <div class="footer-row">
+
+        <div class="sign">
+            Employee Signature
+        </div>
+
+        <div class="sign">
+            Tech Support Signature
+        </div>
+
+    </div>
+
+    <center>
+        <button type="submit" class="btn">
+            Submit Form
+        </button>
+    </center>
+
+</div>
+
+</form>
+
+</body>
+</html>
