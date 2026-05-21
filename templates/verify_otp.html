@@ -1,88 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Verify OTP</title>
-
-    <style>
-        body {
-            font-family: Arial;
-            background: #f1f5f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-
-        .box {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            width: 350px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        input {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-            margin-bottom: 15px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 16px;
-        }
-
-        button {
-            width: 100%;
-            padding: 10px;
-            background: #16a34a;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        button:hover {
-            background: #15803d;
-        }
-
-        h2 {
-            text-align: center;
-        }
-
-        .msg {
-            color: red;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-    </style>
+<title>Verify OTP</title>
 </head>
-
 <body>
 
-<div class="box">
+<h2>Verify OTP</h2>
 
-    <h2>Verify OTP</h2>
+<form method="POST">
 
-    <!-- Flash message -->
-    {% with messages = get_flashed_messages() %}
-      {% if messages %}
-        <p class="msg">{{ messages[0] }}</p>
-      {% endif %}
-    {% endwith %}
+<input type="text"
+name="otp"
+placeholder="Enter OTP"
+required>
 
-    <form method="POST">
+<br><br>
 
-        <input type="text"
-               name="otp"
-               placeholder="Enter OTP sent to your email"
-               required>
+<button type="submit">
+Verify OTP
+</button>
 
-        <button type="submit">Verify OTP</button>
-
-    </form>
-
-</div>
+</form>
 
 </body>
 </html>
