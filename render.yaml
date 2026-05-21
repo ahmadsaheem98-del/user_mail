@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: user-mail
+    name: user-mail-app
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: python app.py
+    startCommand: gunicorn app:app

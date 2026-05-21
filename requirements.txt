@@ -1,7 +1,5 @@
 Flask
 Flask-SQLAlchemy
-Flask-Mail
 Werkzeug
-openpyxl
-twilio
 gunicorn
+reportlab

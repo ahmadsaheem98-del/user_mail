@@ -2,264 +2,100 @@
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Segoe UI", Arial, sans-serif;
+    font-family: Arial, sans-serif;
 }
 
 body {
-    background: #f4f6f9;
-    color: #111827;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
 }
 
-/* =========================
-   HEADER (COMMON)
-========================= */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    background: white;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
-.header h1 {
-    font-size: 20px;
-}
-
-.logout {
-    background: #ef4444;
-    color: white;
-    padding: 8px 14px;
-    border-radius: 6px;
-    text-decoration: none;
-}
-
-.logout:hover {
-    background: #dc2626;
-}
-
-/* =========================
-   SIDEBAR STYLE (ADMIN)
-========================= */
-.sidebar {
-    position: fixed;
-    left: 0;
-    top: 0;
-    width: 220px;
-    height: 100%;
-    background: #111827;
-    padding: 20px;
-    color: white;
-}
-
-.sidebar h2 {
-    font-size: 18px;
-    margin-bottom: 20px;
-}
-
-.sidebar a {
-    display: block;
-    color: #cbd5e1;
-    padding: 10px;
-    text-decoration: none;
-    border-radius: 6px;
-    margin-bottom: 8px;
-}
-
-.sidebar a:hover {
-    background: #1f2937;
-    color: white;
-}
-
-/* =========================
-   MAIN CONTENT (ADMIN)
-========================= */
-.main {
-    margin-left: 240px;
-    padding: 20px;
-}
-
-/* =========================
-   CARDS (ADMIN DASHBOARD)
-========================= */
-.cards {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
-    margin-top: 20px;
-}
-
-.card-box {
-    background: white;
-    padding: 20px;
+/* ===================== CONTAINER ===================== */
+.container, form {
+    width: 380px;
+    margin: 80px auto;
+    background: #fff;
+    padding: 25px;
     border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
+/* ===================== HEADINGS ===================== */
+h2 {
     text-align: center;
+    margin-bottom: 20px;
+    color: #333;
 }
 
-.card-box h4 {
-    color: #6b7280;
-    font-size: 14px;
+/* ===================== INPUTS ===================== */
+input {
+    width: 100%;
+    padding: 10px;
+    margin: 8px 0;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    outline: none;
 }
 
-.card-box h2 {
+input:focus {
+    border-color: #667eea;
+}
+
+/* ===================== BUTTON ===================== */
+button {
+    width: 100%;
+    padding: 10px;
+    background: #667eea;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
     margin-top: 10px;
 }
 
-/* =========================
-   TABLE BOX
-========================= */
-.table-box,
-.table-container {
-    background: white;
-    margin-top: 20px;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
-/* TABLE */
-table {
-    width: 100%;
-    border-collapse: collapse;
-}
-
-th {
-    background: #f3f4f6;
-    padding: 12px;
-    text-align: left;
-}
-
-td {
-    padding: 12px;
-    border-bottom: 1px solid #eee;
-}
-
-tr:hover {
-    background: #f9fafb;
-}
-
-/* =========================
-   BUTTONS
-========================= */
-.action-btn {
-    padding: 6px 10px;
-    border-radius: 5px;
-    text-decoration: none;
-    color: white;
-    font-size: 13px;
-    margin-right: 5px;
-}
-
-.view {
-    background: #2563eb;
-}
-
-.approve {
-    background: #16a34a;
-}
-
-.reject {
-    background: #dc2626;
-}
-
-.excel {
-    background: #f59e0b;
-}
-
-.pdf {
-    background: #7c3aed;
-}
-
-/* =========================
-   STATUS LABELS
-========================= */
-.status {
-    padding: 5px 10px;
-    border-radius: 20px;
-    font-size: 12px;
-    font-weight: bold;
-}
-
-.Approved {
-    background: #dcfce7;
-    color: #16a34a;
-}
-
-.Rejected {
-    background: #fee2e2;
-    color: #dc2626;
-}
-
-.Pending {
-    background: #fef9c3;
-    color: #ca8a04;
-}
-
-/* =========================
-   FORMS (USER + LOGIN)
-========================= */
-form {
-    background: white;
-    padding: 20px;
-    border-radius: 10px;
-    width: 400px;
-    margin: 40px auto;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-}
-
-input,
-textarea,
-select {
-    width: 100%;
-    padding: 10px;
-    margin-top: 8px;
-    margin-bottom: 15px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-}
-
-button {
-    background: #2563eb;
-    color: white;
-    padding: 10px;
-    border: none;
-    width: 100%;
-    border-radius: 6px;
-    cursor: pointer;
-}
-
 button:hover {
-    background: #1d4ed8;
+    background: #5a67d8;
 }
 
-/* =========================
-   LOGIN BOX
-========================= */
-.login-box {
-    width: 350px;
-    margin: 80px auto;
+/* ===================== LINKS ===================== */
+a {
+    display: block;
+    text-align: center;
+    margin-top: 10px;
+    color: #fff;
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* ===================== DASHBOARD ===================== */
+.dashboard {
+    width: 90%;
+    margin: 40px auto;
     background: white;
-    padding: 25px;
+    padding: 20px;
     border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
-/* =========================
-   RESPONSIVE
-========================= */
-@media (max-width: 768px) {
-    .cards {
-        grid-template-columns: 1fr;
-    }
+.card {
+    background: #f1f5f9;
+    padding: 15px;
+    margin: 10px 0;
+    border-radius: 8px;
+}
 
-    .sidebar {
-        position: relative;
-        width: 100%;
-        height: auto;
-    }
+/* ===================== ADMIN HEADER ===================== */
+.header {
+    background: #2d3748;
+    color: white;
+    padding: 15px;
+    text-align: center;
+}
 
-    .main {
-        margin-left: 0;
-    }
+.logout {
+    color: red;
+    float: right;
 }
