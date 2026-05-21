@@ -144,7 +144,13 @@ with app.app_context():
 # LOGIN
 # =====================================================
 
+# =====================================================
+# LOGIN
+# =====================================================
+
 @app.route('/', methods=['GET', 'POST'])
+@app.route('/login', methods=['GET', 'POST'])
+
 def login():
 
     if request.method == 'POST':
@@ -175,7 +181,6 @@ def login():
         return "Invalid Username or Password"
 
     return render_template('login.html')
-
 # =====================================================
 # REGISTER
 # =====================================================
