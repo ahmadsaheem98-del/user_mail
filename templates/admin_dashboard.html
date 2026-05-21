@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Admin Dashboard</title>
@@ -20,27 +18,40 @@
 
 body{
     background:#f1f5f9;
+    display:flex;
+}
+
+/* SIDEBAR */
+
+.sidebar{
+    width:240px;
+    min-height:100vh;
+    background:#020c2b;
+    color:white;
     padding:20px;
 }
 
-.header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    margin-bottom:25px;
+.sidebar h2{
+    margin-bottom:30px;
+    font-size:26px;
 }
 
-.header h1{
-    color:#0f172a;
-}
-
-.logout{
-    background:red;
+.sidebar a{
+    display:block;
     color:white;
-    padding:10px 18px;
     text-decoration:none;
-    border-radius:8px;
+    margin-bottom:20px;
+    font-size:18px;
 }
+
+/* MAIN */
+
+.main{
+    flex:1;
+    padding:20px;
+}
+
+/* CARDS */
 
 .cards{
     display:grid;
@@ -52,35 +63,37 @@ body{
 .card{
     background:white;
     padding:25px;
-    border-radius:15px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    border-radius:12px;
+    box-shadow:0 4px 10px rgba(0,0,0,0.1);
     text-align:center;
 }
 
-.card h2{
+.card h1{
     font-size:35px;
     margin-bottom:10px;
 }
 
 .card p{
-    font-size:18px;
-    color:#475569;
+    color:#555;
 }
+
+/* TABLE */
 
 .table-box{
     background:white;
     padding:20px;
-    border-radius:15px;
-    box-shadow:0 5px 15px rgba(0,0,0,0.1);
+    border-radius:12px;
+    overflow-x:auto;
 }
 
 table{
     width:100%;
     border-collapse:collapse;
+    min-width:700px;
 }
 
 table th{
-    background:#0f172a;
+    background:#111827;
     color:white;
     padding:12px;
 }
@@ -91,11 +104,13 @@ table td{
     text-align:center;
 }
 
-.action-btn{
-    padding:7px 12px;
-    color:white;
+/* BUTTONS */
+
+.btn{
+    padding:6px 12px;
     text-decoration:none;
-    border-radius:6px;
+    color:white;
+    border-radius:5px;
     font-size:13px;
 }
 
@@ -107,7 +122,11 @@ table td{
     background:#16a34a;
 }
 
-.pdf{
+.reject{
+    background:red;
+}
+
+.download{
     background:#ea580c;
 }
 
@@ -115,30 +134,50 @@ table td{
     background:#059669;
 }
 
-.status{
+/* STATUS */
+
+.pending{
+    color:orange;
     font-weight:bold;
 }
 
-.pending{
-    color:#f59e0b;
-}
-
-.approved-status{
-    color:#16a34a;
+.approved{
+    color:green;
+    font-weight:bold;
 }
 
 .rejected{
     color:red;
+    font-weight:bold;
 }
 
+/* MOBILE */
+
 @media(max-width:900px){
+
+body{
+    flex-direction:column;
+}
+
+.sidebar{
+    width:100%;
+    min-height:auto;
+}
 
 .cards{
     grid-template-columns:repeat(2,1fr);
 }
 
-table{
-    font-size:12px;
+}
+
+@media(max-width:600px){
+
+.cards{
+    grid-template-columns:1fr;
+}
+
+.card h1{
+    font-size:28px;
 }
 
 }
@@ -149,150 +188,139 @@ table{
 
 <body>
 
-<div class="header">
+<!-- SIDEBAR -->
 
-    <h1>ADMIN DASHBOARD</h1>
+<div class="sidebar">
 
-    <a href="/logout" class="logout">
-        Logout
-    </a>
+    <h2>MAIL SYSTEM</h2>
 
-</div>
+    <a href="/admin">📊 Dashboard</a>
 
-<div class="cards">
-
-    <div class="card">
-
-        <h2>{{ total_forms }}</h2>
-
-        <p>Total Forms</p>
-
-    </div>
-
-    <div class="card">
-
-        <h2>{{ approved_forms }}</h2>
-
-        <p>Approved</p>
-
-    </div>
-
-    <div class="card">
-
-        <h2>{{ pending_forms }}</h2>
-
-        <p>Pending</p>
-
-    </div>
-
-    <div class="card">
-
-        <h2>{{ rejected_forms }}</h2>
-
-        <p>Rejected</p>
-
-    </div>
+    <a href="/logout">🚪 Logout</a>
 
 </div>
 
-<div class="table-box">
+<!-- MAIN -->
 
-<table>
+<div class="main">
 
-<tr>
+    <div class="cards">
 
-<th>ID</th>
+        <div class="card">
+            <h1>{{ total_forms }}</h1>
+            <p>Total Forms</p>
+        </div>
 
-<th>Employee</th>
+        <div class="card">
+            <h1>{{ approved_forms }}</h1>
+            <p>Approved</p>
+        </div>
 
-<th>Department</th>
+        <div class="card">
+            <h1>{{ pending_forms }}</h1>
+            <p>Pending</p>
+        </div>
 
-<th>Status</th>
+        <div class="card">
+            <h1>{{ rejected_forms }}</h1>
+            <p>Rejected</p>
+        </div>
 
-<th>Actions</th>
+    </div>
 
-</tr>
+    <div class="table-box">
 
-{% for form in forms %}
+        <h2 style="margin-bottom:20px;">
+            All Forms
+        </h2>
 
-<tr>
+        <table>
 
-<td>{{ form.id }}</td>
+            <tr>
 
-<td>{{ form.first_name }} {{ form.last_name }}</td>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Department</th>
+                <th>Status</th>
+                <th>Actions</th>
 
-<td>{{ form.department }}</td>
+            </tr>
 
-<td class="status">
+            {% for form in forms %}
 
-    {% if form.status == 'Approved' %}
+            <tr>
 
-        <span class="approved-status">
-            Approved
-        </span>
+                <td>{{ form.id }}</td>
 
-    {% elif form.status == 'Rejected' %}
+                <td>
+                    {{ form.first_name }}
+                    {{ form.last_name }}
+                </td>
 
-        <span class="rejected">
-            Rejected
-        </span>
+                <td>{{ form.department }}</td>
 
-    {% else %}
+                <td>
 
-        <span class="pending">
-            Pending
-        </span>
+                    {% if form.status == 'Approved' %}
 
-    {% endif %}
+                        <span class="approved">
+                            Approved
+                        </span>
 
-</td>
+                    {% elif form.status == 'Rejected' %}
 
-<td>
+                        <span class="rejected">
+                            Rejected
+                        </span>
 
-<a href="/view/{{ form.id }}"
-class="action-btn view">
+                    {% else %}
 
-View
+                        <span class="pending">
+                            Pending
+                        </span>
 
-</a>
+                    {% endif %}
 
-<a href="/approve/{{ form.id }}"
-class="action-btn approve">
+                </td>
 
-Approve
+                <td>
 
-</a>
+                    <a href="/view/{{ form.id }}"
+                    class="btn view">
+                    View
+                    </a>
 
-<a href="/reject/{{ form.id }}"
-class="action-btn reject">
+                    <a href="/approve/{{ form.id }}"
+                    class="btn approve">
+                    Approve
+                    </a>
 
-Reject
+                    <a href="/reject/{{ form.id }}"
+                    class="btn reject">
+                    Reject
+                    </a>
 
-</a>
+                    <a href="/download/{{ form.id }}"
+                    class="btn download">
+                    PDF
+                    </a>
 
-<a href="/download/{{ form.id }}"
-class="action-btn pdf">
+                    <a href="/export_excel/{{ form.id }}"
+                    class="btn excel">
+                    Excel
+                    </a>
 
-PDF
+                </td>
 
-</a>
+            </tr>
 
-<a href="/export_excel/{{ form.id }}"
-class="action-btn excel">
+            {% endfor %}
 
-Excel
+        </table>
 
-</a>
-
-</td>
-</tr>
-
-{% endfor %}
-
-</table>
+    </div>
 
 </div>
 
 </body>
-
 </html>
