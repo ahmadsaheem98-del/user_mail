@@ -351,7 +351,6 @@ def admin():
 def view(id):
 
     if session.get('role') != 'admin':
-
         return redirect('/')
 
     form = MailForm.query.get_or_404(id)
@@ -360,8 +359,7 @@ def view(id):
         'view_form.html',
         form=form
     )
-
-# =====================================================
+#=====================================================
 # APPROVE
 # =====================================================
 
