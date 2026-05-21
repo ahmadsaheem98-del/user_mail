@@ -8,8 +8,11 @@ from flask_sqlalchemy import SQLAlchemy
 from werkzeug.security import generate_password_hash
 from werkzeug.security import check_password_hash
 
+from flask_mail import Mail, Message
+
 from waitress import serve
 
+import random
 import os
 
 # =====================================================
@@ -21,18 +24,34 @@ app = Flask(__name__)
 app.secret_key = "secret_key"
 
 # =====================================================
-# DATABASE FIX
+# DATABASE
 # =====================================================
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
 
 DB_PATH = os.path.join(BASE_DIR, "mail_system.db")
 
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + DB_PATH
+app.config['SQLALCHEMY_DATABASE_URI'] = "sqlite:///" + DB_PATH
 
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db = SQLAlchemy(app)
+
+# =====================================================
+# MAIL CONFIG
+# =====================================================
+
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 587
+app.config['MAIL_USE_TLS'] = True
+
+# CHANGE THIS
+app.config['MAIL_USERNAME'] = 'yourgmail@gmail.com'
+
+# CHANGE THIS
+app.config['MAIL_PASSWORD'] = 'your_app_password'
+
+mail = Mail(app)
 
 # =====================================================
 # USER TABLE
@@ -110,7 +129,7 @@ class MailForm(db.Model):
     )
 
 # =====================================================
-# CREATE DATABASE
+# DATABASE CREATE
 # =====================================================
 
 with app.app_context():
@@ -139,10 +158,6 @@ with app.app_context():
         db.session.add(admin_user)
 
         db.session.commit()
-
-# =====================================================
-# LOGIN
-# =====================================================
 
 # =====================================================
 # LOGIN
@@ -181,6 +196,7 @@ def login():
         return "Invalid Username or Password"
 
     return render_template('login.html')
+
 # =====================================================
 # REGISTER
 # =====================================================
@@ -190,12 +206,12 @@ def register():
 
     if request.method == 'POST':
 
-        username = request.form.get('username')
+        username = request.form['username']
 
-        email = request.form.get('email')
+        email = request.form['email']
 
         password = generate_password_hash(
-            request.form.get('password')
+            request.form['password']
         )
 
         check_user = User.query.filter(
@@ -222,9 +238,88 @@ def register():
 
         db.session.commit()
 
-        return redirect('/')
+        return redirect('/login')
 
     return render_template('register.html')
+
+# =====================================================
+# FORGOT PASSWORD
+# =====================================================
+
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+
+    if request.method == 'POST':
+
+        email = request.form['email']
+
+        user = User.query.filter_by(email=email).first()
+
+        if not user:
+            return "Email not found"
+
+        otp = str(random.randint(100000, 999999))
+
+        session['otp'] = otp
+        session['reset_email'] = email
+
+        msg = Message(
+            'OTP Verification',
+            sender=app.config['MAIL_USERNAME'],
+            recipients=[email]
+        )
+
+        msg.body = f'Your OTP is: {otp}'
+
+        mail.send(msg)
+
+        return redirect('/verify_otp')
+
+    return render_template('forgot_password.html')
+
+# =====================================================
+# VERIFY OTP
+# =====================================================
+
+@app.route('/verify_otp', methods=['GET', 'POST'])
+def verify_otp():
+
+    if request.method == 'POST':
+
+        otp = request.form['otp']
+
+        if otp == session.get('otp'):
+
+            return redirect('/reset_password')
+
+        return "Invalid OTP"
+
+    return render_template('verify_otp.html')
+
+# =====================================================
+# RESET PASSWORD
+# =====================================================
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+
+    if request.method == 'POST':
+
+        password = generate_password_hash(
+            request.form['password']
+        )
+
+        user = User.query.filter_by(
+            email=session.get('reset_email')
+        ).first()
+
+        user.password = password
+
+        db.session.commit()
+
+        return redirect('/login')
+
+    return render_template('reset_password.html')
 
 # =====================================================
 # USER DASHBOARD
@@ -235,14 +330,18 @@ def dashboard():
 
     if 'user' not in session:
 
-        return redirect('/')
+        return redirect('/login')
 
     forms = MailForm.query.filter_by(
+
         created_by_user=session['user']
+
     ).all()
 
     return render_template(
+
         'user_dashboard.html',
+
         forms=forms
     )
 
@@ -255,7 +354,7 @@ def create():
 
     if 'user' not in session:
 
-        return redirect('/')
+        return redirect('/login')
 
     if request.method == 'POST':
 
@@ -300,7 +399,7 @@ def create():
 
         db.session.commit()
 
-        return render_template('success.html')
+        return redirect('/dashboard')
 
     return render_template('form.html')
 
@@ -313,7 +412,7 @@ def admin():
 
     if session.get('role') != 'admin':
 
-        return redirect('/')
+        return redirect('/login')
 
     forms = MailForm.query.order_by(
         MailForm.id.desc()
@@ -356,7 +455,8 @@ def admin():
 def view(id):
 
     if session.get('role') != 'admin':
-        return redirect('/')
+
+        return redirect('/login')
 
     form = MailForm.query.get_or_404(id)
 
@@ -364,7 +464,8 @@ def view(id):
         'view_form.html',
         form=form
     )
-#=====================================================
+
+# =====================================================
 # APPROVE
 # =====================================================
 
@@ -373,7 +474,7 @@ def approve(id):
 
     if session.get('role') != 'admin':
 
-        return redirect('/')
+        return redirect('/login')
 
     form = MailForm.query.get_or_404(id)
 
@@ -392,7 +493,7 @@ def reject(id):
 
     if session.get('role') != 'admin':
 
-        return redirect('/')
+        return redirect('/login')
 
     form = MailForm.query.get_or_404(id)
 
@@ -403,7 +504,7 @@ def reject(id):
     return redirect('/admin')
 
 # =====================================================
-# DOWNLOAD HTML
+# DOWNLOAD
 # =====================================================
 
 @app.route('/download/<int:id>')
@@ -411,7 +512,7 @@ def download(id):
 
     if session.get('role') != 'admin':
 
-        return redirect('/')
+        return redirect('/login')
 
     form = MailForm.query.get_or_404(id)
 
@@ -439,7 +540,7 @@ def export_excel(id):
 
     if session.get('role') != 'admin':
 
-        return redirect('/')
+        return redirect('/login')
 
     form = MailForm.query.get_or_404(id)
 
@@ -469,11 +570,17 @@ def logout():
 
     session.clear()
 
-    return redirect('/')
+    return redirect('/login')
 
 # =====================================================
 # RUN
 # =====================================================
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=5000)
+
+    port = int(os.environ.get("PORT", 5000))
+
+    app.run(
+        host="0.0.0.0",
+        port=port
+    )
